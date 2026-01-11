@@ -93,31 +93,77 @@
 
 
 
+# from app.models.user import User
+# from app.models.role import Role
+# from app.models.task import Task
+# from app.services.task_service import TaskService, PermissionDenied
+
+# user = User(id=1, username="user1", role=Role.USER)
+# manager = User(id=2, username="manager1", role=Role.MANAGER)
+# admin = User(id=3, username="admin1", role=Role.ADMIN)
+
+# task = Task(
+#     id=1,
+#     title="Buy cloud credits",
+#     description="AWS credits purchase",
+#     created_by=user,
+#     assigned_to=manager
+# )
+
+# # Submit
+# TaskService.submit_task(task, user)
+# print(task.status)
+
+# # Approve (manager)
+# TaskService.approve_task(task, manager)
+# print(task.status)
+
+# # Close (admin)
+# TaskService.close_task(task, admin)
+# print(task.status)
+
+
+
+
+
+
 from app.models.user import User
 from app.models.role import Role
 from app.models.task import Task
-from app.services.task_service import TaskService, PermissionDenied
+from app.services.task_service import TaskService
+from app.repositories.task_repository import TaskRepository
 
 user = User(id=1, username="user1", role=Role.USER)
 manager = User(id=2, username="manager1", role=Role.MANAGER)
 admin = User(id=3, username="admin1", role=Role.ADMIN)
 
+users = {
+    1: user,
+    2: manager,
+    3: admin,
+}
+
+repo = TaskRepository()
+
 task = Task(
     id=1,
-    title="Buy cloud credits",
-    description="AWS credits purchase",
+    title="Buy server",
+    description="New production server",
     created_by=user,
-    assigned_to=manager
+    assigned_to=manager,
 )
 
-# Submit
+repo.save(task)
+
 TaskService.submit_task(task, user)
-print(task.status)
+repo.save(task)
 
-# Approve (manager)
 TaskService.approve_task(task, manager)
-print(task.status)
+repo.save(task)
 
-# Close (admin)
 TaskService.close_task(task, admin)
-print(task.status)
+repo.save(task)
+
+loaded_task = repo.get_by_id(1, users)
+print(loaded_task)
+print(loaded_task.status)
