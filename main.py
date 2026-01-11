@@ -53,37 +53,71 @@
 
 
 
+# from app.models.user import User
+# from app.models.role import Role
+# from app.models.task import Task, TaskStatus
+# from app.permissions.task_permissions import TaskPermission, TaskAction
+# from app.workflows.task_workflow import TaskWorkflow, InvalidWorkflowTransition
+
+# user = User(id=1, username="user1", role=Role.USER)
+# manager = User(id=2, username="manager1", role=Role.MANAGER)
+
+# task = Task(
+#     id=1,
+#     title="Purchase laptop",
+#     description="New developer machine",
+#     created_by=user,
+#     assigned_to=manager
+# )
+
+# # USER submits task
+# if TaskPermission.can_perform(user.role, TaskAction.SUBMIT):
+#     TaskWorkflow.transition(task, TaskStatus.SUBMITTED)
+
+# print(task.status)
+
+# # USER tries to approve (should fail permission)
+# if TaskPermission.can_perform(user.role, TaskAction.APPROVE):
+#     TaskWorkflow.transition(task, TaskStatus.APPROVED)
+# else:
+#     print("User not allowed to approve")
+
+# # MANAGER approves
+# if TaskPermission.can_perform(manager.role, TaskAction.APPROVE):
+#     TaskWorkflow.transition(task, TaskStatus.APPROVED)
+
+# print(task.status)
+
+
+
+
+
+
 from app.models.user import User
 from app.models.role import Role
-from app.models.task import Task, TaskStatus
-from app.permissions.task_permissions import TaskPermission, TaskAction
-from app.workflows.task_workflow import TaskWorkflow, InvalidWorkflowTransition
+from app.models.task import Task
+from app.services.task_service import TaskService, PermissionDenied
 
 user = User(id=1, username="user1", role=Role.USER)
 manager = User(id=2, username="manager1", role=Role.MANAGER)
+admin = User(id=3, username="admin1", role=Role.ADMIN)
 
 task = Task(
     id=1,
-    title="Purchase laptop",
-    description="New developer machine",
+    title="Buy cloud credits",
+    description="AWS credits purchase",
     created_by=user,
     assigned_to=manager
 )
 
-# USER submits task
-if TaskPermission.can_perform(user.role, TaskAction.SUBMIT):
-    TaskWorkflow.transition(task, TaskStatus.SUBMITTED)
-
+# Submit
+TaskService.submit_task(task, user)
 print(task.status)
 
-# USER tries to approve (should fail permission)
-if TaskPermission.can_perform(user.role, TaskAction.APPROVE):
-    TaskWorkflow.transition(task, TaskStatus.APPROVED)
-else:
-    print("User not allowed to approve")
+# Approve (manager)
+TaskService.approve_task(task, manager)
+print(task.status)
 
-# MANAGER approves
-if TaskPermission.can_perform(manager.role, TaskAction.APPROVE):
-    TaskWorkflow.transition(task, TaskStatus.APPROVED)
-
+# Close (admin)
+TaskService.close_task(task, admin)
 print(task.status)
